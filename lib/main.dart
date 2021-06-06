@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_api/logic/cubits/comments/comments_cubit.dart';
+import 'package:flutter_api/logic/cubits/posts/posts_cubit.dart';
 import 'package:flutter_api/presentation/screens/comments_screen.dart';
 import 'package:flutter_api/presentation/screens/home_screen.dart';
-import 'package:provider/provider.dart';
-import 'data/repositories/comment_repository.dart';
-import 'data/repositories/post_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return MultiBlocProvider(
       providers: [
-        ChangeNotifierProvider<PostRepository>(create: (_) => PostRepository()),
-        ChangeNotifierProvider<CommentRepository>(create: (_) => CommentRepository())
+        BlocProvider<PostsCubit>(create: (context)=> PostsCubit()),
+        BlocProvider<CommentsCubit>(create: (context)=> CommentsCubit())
       ],
       child: MaterialApp(
         title: 'Movies App',

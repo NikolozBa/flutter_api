@@ -21,11 +21,11 @@ class PostsLoaded extends PostsState{
 
 
 class PostsError extends PostsState {
-  final String errprMessage;
+  final String errorMessage;
 
-  PostsError(this.errprMessage);
+  PostsError(this.errorMessage);
 
   @override
-  List<Object> get props => [errprMessage];
+  List<Object> get props => [errorMessage];
 
 }

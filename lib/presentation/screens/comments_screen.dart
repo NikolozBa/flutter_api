@@ -1,52 +1,98 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_api/data/repositories/comment_repository.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_api/logic/cubits/comments/comments_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CommentsScreen extends StatefulWidget {
-  static const routeName = "/comments-screen";
 
+class CommentsScreen extends StatelessWidget {
   const CommentsScreen({Key key}) : super(key: key);
 
-  @override
-  _CommentsScreenState createState() => _CommentsScreenState();
-}
-
-class _CommentsScreenState extends State<CommentsScreen> {
+  static const routeName = "/comments-screen";
 
   @override
   Widget build(BuildContext context) {
-    final postId = ModalRoute.of(context).settings.arguments;
-    Provider.of<CommentRepository>(context, listen: false).fetchComments(postId);
+    final int postId = ModalRoute.of(context).settings.arguments;
 
     return Scaffold(
-      appBar: AppBar(),
-      body: Consumer<CommentRepository>(
-        builder: (context, dataObj, child){
-
-          return ListView.builder(
-            itemCount: Provider.of<CommentRepository>(context, listen: false).comments.length,
-            itemBuilder: (ctx, index) {
-              return Column(
-                children: [
-                  Container(
-
-                      child: Text(Provider.of<CommentRepository>(context, listen: false).comments[index].name),
-                      padding: EdgeInsets.all(20)
-                  )
-
-                ],
-              );
-            },
-          );
-        },
-
+      appBar: AppBar(
+        title: Text("Comments"),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-        },
+      body: BlocConsumer<CommentsCubit, CommentsState>(
+        listener: (context, state){
 
-        child: Icon(Icons.add),
+          if(state is CommentsError){
+            showDialog(context: context, builder: (_)=>AlertDialog(
+              title: Text("ERROR"),
+              content: Text(state.errorMessage),
+              actions: [
+                TextButton(
+                  onPressed: (){
+                    return Navigator.pop(context);
+                  },
+                  child: Text("OK"),
+                )
+              ],
+            ));
+          }
+        },
+        builder: (context, state){
+
+          if(state is CommentsInitial){
+
+            BlocProvider.of<CommentsCubit>(context).getComments(postId);
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          else if(state is CommentsLoaded){
+            return ListView.builder(
+              itemCount: state.comments.length,
+              itemBuilder: (ctx, index) {
+                return Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(top: 20, bottom: 10),
+                          child: Text(
+                            state.comments[index].name,
+                            style: TextStyle(
+                                fontSize: 18
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 12),
+                          child: Text(
+                            state.comments[index].email,
+                            style: TextStyle(
+                                fontSize: 14
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(top: 12, bottom: 20),
+                          child: Text(
+                            state.comments[index].body,
+                            style: TextStyle(
+                                fontSize: 22
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+
+          return Container();
+        },
       ),
+
     );
   }
 }
+
